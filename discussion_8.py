@@ -2,18 +2,29 @@ from bs4 import BeautifulSoup
 import requests
 import unittest
 
+
+
 # Task 2: Look at the Get the URL that links to webpage of universities with Olympic medal wins
 # search for the url in the University of Michgian wikipedia page (in the third pargraph of the intro)
 # HINT: You will have to add https://en.wikipedia.org to the URL retrieved using BeautifulSoup
 def getLink(soup):
-    
-    pass
+
+
+    a_tag = soup.find("a", title = "List of American universities with Olympic metals")
+    return "https://en.wikipedia.org" + a_tag.get('href')
 
 # Task 3: Get the details from the box titled "College/school founding". Get all the college/school names and the year they were
 # founded and organize the same into key-value pairs.
-def getAdmissionsInfo2019(soup):
-
-    pass
+def get_school_founded_year(soup):
+    table_tag = soup.find("table", class_="toccolours")
+    tr_list = table_tag.find_all("tr")
+    school_year_dict = {}
+    for tr_tag in tr_list[1:]:
+        td_list = tr_tag.find_all("td")
+        school_name = td_list[0].text
+        year = td_list[1].text.strip()
+        school_year_dict[school_name] = year
+    return school_year_dict
 
 
 
@@ -22,9 +33,13 @@ def main():
 
     #### YOUR CODE HERE####
 
+    url = "https://en.wikipedia.org/wiki/University_of_Michigan"
+    r = requests.get(url).text
+    soup = BeautifulSoup(r, "html.parser")
+
     #Call the functions getLink(soup) and getAdmissionsInfo2019(soup) on your soup object.
     getLink(soup)
-    getAdmissionsInfo2019(soup)
+    get_school_founded_year(soup)
 
 class TestAllMethods(unittest.TestCase):
     def setUp(self):
@@ -34,7 +49,9 @@ class TestAllMethods(unittest.TestCase):
         self.assertEqual(getLink(self.soup), 'https://en.wikipedia.org/wiki/List_of_American_universities_with_Olympic_medals')
 
     def test_admissions_info(self):
-        self.assertEqual(getAdmissionsInfo2019(self.soup), {'Engineering': '1854', 
+        self.assertEqual(get_school_founded_year(self.soup), {'Literature Science, and the Arts': '1841',
+                                                            'Medicine': '1850',
+                                                            'Engineering': '1854', 
                                                             'Law': '1859',
                                                             'Dentistry': '1875', 
                                                             'Pharmacy': '1876', 
